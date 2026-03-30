@@ -1,18 +1,14 @@
-import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import AuthLayout from '@/layouts/auth-layout';
-import { store } from '@/routes/password/confirm';
 import { Form, Head } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
+import InputError from '@/components/input-error';
+import PasswordInput from '@/components/password-input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
+import { store } from '@/routes/password/confirm';
 
 export default function ConfirmPassword() {
     return (
-        <AuthLayout
-            title="Confirm your password"
-            description="This is a secure area of the application. Please confirm your password before continuing."
-        >
+        <>
             <Head title="Confirm password" />
 
             <Form {...store.form()} resetOnSuccess={['password']}>
@@ -20,9 +16,8 @@ export default function ConfirmPassword() {
                     <div className="space-y-6">
                         <div className="grid gap-2">
                             <Label htmlFor="password">Password</Label>
-                            <Input
+                            <PasswordInput
                                 id="password"
-                                type="password"
                                 name="password"
                                 placeholder="Password"
                                 autoComplete="current-password"
@@ -38,15 +33,19 @@ export default function ConfirmPassword() {
                                 disabled={processing}
                                 data-test="confirm-password-button"
                             >
-                                {processing && (
-                                    <LoaderCircle className="h-4 w-4 animate-spin" />
-                                )}
+                                {processing && <Spinner />}
                                 Confirm password
                             </Button>
                         </div>
                     </div>
                 )}
             </Form>
-        </AuthLayout>
+        </>
     );
 }
+
+ConfirmPassword.layout = {
+    title: 'Confirm your password',
+    description:
+        'This is a secure area of the application. Please confirm your password before continuing.',
+};

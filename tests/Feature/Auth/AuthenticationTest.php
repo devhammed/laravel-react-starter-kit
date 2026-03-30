@@ -16,7 +16,7 @@ class AuthenticationTest extends TestCase
     {
         $response = $this->get(route('login'));
 
-        $response->assertStatus(200);
+        $response->assertOk();
     }
 
     public function test_users_can_authenticate_using_the_login_screen()
@@ -34,9 +34,7 @@ class AuthenticationTest extends TestCase
 
     public function test_users_with_two_factor_enabled_are_redirected_to_two_factor_challenge()
     {
-        if (! Features::canManageTwoFactorAuthentication()) {
-            $this->markTestSkipped('Two-factor authentication is not enabled.');
-        }
+        $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());
 
         Features::twoFactorAuthentication([
             'confirm' => true,
@@ -87,17 +85,13 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        RateLimiter::increment(implode('|', [$user->email, '127.0.0.1']), amount: 10);
+        RateLimiter::increment(md5('login'.implode('|', [$user->email, '127.0.0.1'])), amount: 5);
 
         $response = $this->post(route('login.store'), [
             'email' => $user->email,
             'password' => 'wrong-password',
         ]);
 
-        $response->assertSessionHasErrors('email');
-
-        $errors = session('errors');
-
-        $this->assertStringContainsString('Too many login attempts', $errors->first('email'));
+        $response->assertTooManyRequests();
     }
 }
